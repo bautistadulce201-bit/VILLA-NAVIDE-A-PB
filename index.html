@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Navidad</title>
+    <link rel="icon" type="image/png" href="./image/f1.png"/> 
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        #boton {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center; 
+            text-align: center;
+            font-size: 40px;
+            cursor: pointer;
+        }
+        #activ {
+            color: rgba(8, 68, 209, 0.801);
+        }
+    </style>
+</head>
+<body>
+
+<!--Boton para activar el pointerlock-->
+<div id="boton">
+    Para comenzar da clic en + para activar <p id="activ">(  )</p>Mira alrededor usando el mouse, pulsa Esc para parar
+</div>
+   
+<canvas id="myCanvas"></canvas>
+ 
+<!-- Librerías -->
+<script src="./font/01.js"></script>  
+<script src="./font/02.js"></script>  
+<script src="./font/03.js"></script> 
+
+<script type="importmap">
+{
+    "imports": {
+        "three": "./js/three.module.js",
+        "three/PointerLockControls": "./js/PointerLockControls.js",
+        "three/interactive": "./js/three.interactive.js"
+    }
+}
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { InteractionManager } from 'three/interactive';
+    import { TWEEN } from './js/tween.module.min.js';
+    import { PointerLockControls } from 'three/PointerLockControls';
+    import { RoundedBoxGeometry } from "./js/RoundedBoxGeometry.js";
+    import duendes from "./objetos/duendes.js";
+    import muneco from "./objetos/muneco.js";
+    import arbol from "./objetos/arbol.js";
+    import bota from "./objetos/bota.js";
+    import arbol2 from "./objetos/arbol2.js";
+    import faro from "./objetos/faro.js";
+    import casa from "./objetos/casa.js";
+    import edificio from "./objetos/edificio.js";
+    import galleta from "./objetos/galleta.js";
+    import regalo from "./objetos/regalo.js";
+    import h1 from "./objetos/h1.js";
+    import h2 from "./objetos/h2.js";  
+ import arco from "./objetos/arco.js";  
+ import regalo2 from "./objetos/regalo2.js";  
+import casa2 from "./objetos/casa2.js";  
+import edificio2 from "./objetos/edificio2.js";  
+
+    import { TextGeometry } from "./js/TextGeometry.js";
+    import { FontLoader } from "./js/FontLoader.js";
+
+    //🕹️ Renderer
+    var renderer = new THREE.WebGLRenderer({ 
+        canvas: document.getElementById('myCanvas'),
+        antialias: true,
+    });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0xffffff);
+
+    // 🎬 Escena
+    var scene = new THREE.Scene();
+ 
+    //🎥 Cámara
+    var camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 3000);
+    camera.position.set(0, 0, 0);
+
+    // PointerLockControls
+    var controls = new PointerLockControls(camera, renderer.domElement);
+    document.getElementById('activ').onclick = () => {
+        controls.lock();
+    };
+    controls.addEventListener('lock', function () {
+        boton.style.display = 'none';
+    });
+    controls.addEventListener('unlock', function () {
+        boton.style.display = '';
+    });
+
+    // InteractionManager
+    var interactionManager = new InteractionManager(renderer, camera, renderer.domElement);
+
+    // Redimensionar canvas
+    const sizes = {
+        width: window.innerWidth,
+        height: window.innerHeight,
+    };
+    const canvas = document.getElementById('myCanvas');
+    window.addEventListener('resize', () => {
+        sizes.width = window.innerWidth;
+        sizes.height = window.innerHeight;
+        camera.aspect = sizes.width / sizes.height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(sizes.width, sizes.height);
+    });
+
+    // Ajuste de cámara
+    camera.position.set(0,220, 2200);
+
+   // 1. 
+    var ambientLight = new THREE.AmbientLight(0x404060, 0.6); 
+    scene.add(ambientLight);
+
+    // 2. 
+    var light = new THREE.DirectionalLight(0xddeeff, 1.2); // Luz blanca azulada
+    light.position.set(-500, 1000, 500); 
+    light.castShadow = true;
+    
+    // Ajustes de calidad de sombra
+    light.shadow.bias = -0.0005;
+    light.shadow.mapSize.width = 2048; // Aumentamos calidad
+    light.shadow.mapSize.height = 2048;
+    
+    // Agrandamos el área que cubre la sombra
+    light.shadow.camera.top = 1500;
+    light.shadow.camera.bottom = -1500;
+    light.shadow.camera.left = -1500;
+    light.shadow.camera.right = 1500;
+    light.shadow.camera.near = 0.5;
+    light.shadow.camera.far = 5000;
+    scene.add(light);
+
+    // 3. 
+    var fillLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    fillLight.position.set(500, 100, -500);
+    scene.add(fillLight);
+
+    // 4. PUNTOS DE LUZ 
+
+    // Luz Central (Cálida sobre el árbol principal)
+    
+
+    var pl01 = new THREE.PointLight(0xFFAA00, 7, 800); 
+    pl01.position.set(0, 150, 200);
+    scene.add(pl01);
+    // var helper01 = new THREE.PointLightHelper(pl01); 
+
+    // Luz Lateral Derecha (Casa)
+    var pl02 = new THREE.PointLight(0xFFAA00, 2, 600);
+    pl02.position.set(1000, 100, -170);
+    scene.add(pl02);
+
+
+    // Luz Lateral Derecha (Casa2)
+    var pl04 = new THREE.PointLight(0xFFAA00, 2, 600);
+    pl04.position.set(-500, 100, -120);
+    scene.add(pl04);
+    
+    // Luz Lateral Izquierda (Edificio)
+    var pl03 = new THREE.PointLight(0xFFAA00, 2, 600);
+    pl03.position.set(-5, 100, -970);
+    scene.add(pl03);
+// Luz galleta
+    var pl05 = new THREE.PointLight(0xFFAA00, 4, 600);
+    pl05.position.set(-930, 200, 1450);
+    scene.add(pl05);
+
+    // Luz faro der
+    var pl06 = new THREE.PointLight(0xFFAA00, 15, 600);
+    pl06.position.set(-1420,-25, 1900);
+    scene.add(pl06);
+
+     // Luz faro der
+    var pl07 = new THREE.PointLight(0xFFAA00, 15, 600);
+    pl07.position.set(1420,-25, 1900);
+    scene.add(pl07);
+
+
+    // --- IZQUIERDA ---
+    
+    // Faro Izq 1 
+    var lf1 = new THREE.PointLight(0xFFEE88, 9, 400);
+    lf1.position.set(-100, 245, 900);
+    scene.add(lf1);
+      
+ 
+    // Faro Izq 2 
+    var lf2 = new THREE.PointLight(0xFFEE88, 5, 400);
+    lf2.position.set(-100, 245, 1150);
+    scene.add(lf2);
+
+    // Faro Izq 3 
+    var lf3 = new THREE.PointLight(0xFFEE88, 5, 800);
+    lf3.position.set(-100, 245, 1620);
+    scene.add(lf3);
+
+    // --- DERECHA ---
+
+    // Faro Der 1 (z: 900)
+    var lf4 = new THREE.PointLight(0xFFEE88, 5, 400);
+    lf4.position.set(100, 245, 900);
+    scene.add(lf4);
+
+    // Faro Der 2 (z: 1150)
+    var lf5 = new THREE.PointLight(0xFFEE88, 2, 400);
+    lf5.position.set(100, 245, 1150);
+    scene.add(lf5);
+
+    // Faro Der 3 (z: 1620)
+    var lf6 = new THREE.PointLight(0xFFEE88, 2, 400);
+    lf6.position.set(100, 245, 1620);
+    scene.add(lf6);
+    // Fondo
+    var loader = new THREE.TextureLoader();
+    var bgTexture = loader.load('./image/fon.jpg');
+    scene.background = bgTexture;
+
+    // Cruz guía
+    var geometryx = new THREE.BoxGeometry(0.0075, 0.05, 0.075);
+    var materialx = new THREE.MeshNormalMaterial({ side: THREE.DoubleSide });
+    var meshx = new THREE.Mesh(geometryx, materialx);
+    meshx.position.set(0, 0, -1);
+
+    var geometryx2 = new THREE.BoxGeometry(0.05, 0.0075, 0.075);
+    var meshx2 = new THREE.Mesh(geometryx2, materialx);
+    meshx2.position.set(0, 0, -1);
+
+    scene.add(camera);
+    camera.add(meshx, meshx2);
+
+    // Base
+    var geometry1 = new THREE.BoxGeometry(3050, 0.8, 3000);
+    var texture1 = new THREE.TextureLoader().load("./image/p3.jpg");
+    var material01 = new THREE.MeshBasicMaterial({ map: texture1 });
+    var mesh01 = new THREE.Mesh(geometry1, material01);
+    mesh01.position.set(0, 3, 650); 
+    scene.add(mesh01);
+    mesh01.receiveShadow = true;
+
+
+
+    //_______________Camino_______________
+
+ var geometry1 = new THREE.BoxGeometry(600, 0.8, 1600);
+    var texture1 = new THREE.TextureLoader().load("./image/p2.jpg");
+    var material01 = new THREE.MeshBasicMaterial({ map: texture1 });
+    var mesh01 = new THREE.Mesh(geometry1, material01);
+    mesh01.position.set(5, 4, 1330); 
+    scene.add(mesh01);
+    mesh01.receiveShadow = true;
+    ///_______ Objetos________
+    // DUENDES
+    var escenario19 = duendes({ x: 0, y: 0, z: 0 });
+    scene.add(escenario19); 
+    escenario19.position.set(-400, -86, 1760);
+    escenario19.scale.set(8.5, 8.5, 8.5); 
+    mesh01.receiveShadow = true;
+  // ________Interacciones duendes________
+    escenario19.addEventListener('mouseover', (event) => {//Evento para cuando colocamos el cursor sobre la figura
+        document.body.style.cursor = 'pointer';
+        event.target.scale.set(8.8, 8.8, 8.8);
+    });
+    escenario19.addEventListener('mouseout', (event) => { //evento para cuando quitas el cursor de la figura, si no se agrega se le quedara el color que se puso en el mouseover
+        document.body.style.cursor = 'default';
+        event.target.scale.set(8.5, 8.5, 8.5);
+    });
+    escenario19.addEventListener('click', (event) => { //evento para cuando se suelta el clic
+        var coords = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+        new TWEEN.Tween(coords)
+            .to({  x: -600, y: 300, z: 2000 })//se indican los cambios que se presentaran y en que variables, INDICA LA POSICIÓN FINAL DE MOVIMIENTO
+            .onUpdate(() => camera.position.set(coords.x, coords.y, coords.z)) //Se actualizan las vartiables en el objetivo del movimiento SE ACTUALIZAN LAS VARIABLES EN LA CAMARA
+            .start();
+    });
+    interactionManager.add(escenario19); 
+ 
+
+    // ________MUNECO_________
+    var escenario2 = muneco({ x: 0, y: 0, z: 0 });
+    scene.add(escenario2); 
+    escenario2.position.set(890, -15, 400);
+    escenario2.scale.set(1.5, 1.5,1.5);
+escenario2.rotation.y = -1.5;  
+
+
+     // ________Interacciones________
+    escenario2.addEventListener('mouseover', (event) => {//Evento para cuando colocamos el cursor sobre la figura
+        document.body.style.cursor = 'pointer';
+        event.target.scale.set(1.4, 1.4, 1.4);
+    });
+    escenario2.addEventListener('mouseout', (event) => { //evento para cuando quitas el cursor de la figura, si no se agrega se le quedara el color que se puso en el mouseover
+        document.body.style.cursor = 'default';
+        event.target.scale.set(1.5, 1.5, 1.5);
+    });
+    escenario2.addEventListener('click', (event) => { //evento para cuando se suelta el clic
+        var coords = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+        new TWEEN.Tween(coords)
+            .to({ x: 200, y: 130, z: 700 })//se indican los cambios que se presentaran y en que variables, INDICA LA POSICIÓN FINAL DE MOVIMIENTO
+            .onUpdate(() => camera.position.set(coords.x, coords.y, coords.z)) //Se actualizan las vartiables en el objetivo del movimiento SE ACTUALIZAN LAS VARIABLES EN LA CAMARA
+            .start();
+    });
+    interactionManager.add(escenario2); 
+
+
+    
+    // faro
+    
+    var escenario6 = faro({ x: 0, y: 0, z: 0 });
+    scene.add(escenario6); 
+    escenario6.position.set(-1420, -15, 1900);
+    escenario6.scale.set(7, 7, 7);
+    escenario6.rotation.y = 1.5; 
+    
+     // faro 2
+    
+    var escenario6 = faro({ x: 0, y: 0, z: 0 });
+    scene.add(escenario6); 
+    escenario6.position.set(1420, -15, 1900);
+    escenario6.scale.set(7, 7, 7);
+    escenario6.rotation.y = 1.5;  
+
+ // Casa1
+
+ var escenario7 = casa({ x: 0, y: 0, z: 0 });
+    scene.add(escenario7); 
+    escenario7.position.set(1000, 0, -470);
+    escenario7.scale.set(3, 3,3);
+    escenario7.rotation.y = -.9;  
+escenario7.receiveShadow = true;
+// =----Casa2-----
+
+ var escenario18 = casa2({ x: 0, y: 0, z: 0 });
+    scene.add(escenario18); 
+    escenario18.position.set(-350, 0, -650);
+    escenario18.scale.set(3, 3,3);
+    escenario18.rotation.y = .5;  
+escenario18.receiveShadow = true;
+//-----------edificio----------
+
+ var escenario8 = edificio({ x: 0, y: 0, z: 0 });
+    scene.add(escenario8); 
+    escenario8.position.set(260, 0, -610);
+    escenario8.scale.set(3, 3,3);
+   //escenario8.rotation.y = 1.2;  
+escenario8.receiveShadow = true;
+
+//-----------edificio 2----------
+
+ var escenario20 = edificio2({ x: 0, y: 0, z: 0 });
+    scene.add(escenario20); 
+    escenario20.position.set(-900, 0, -150);
+    escenario20.scale.set(3, 3,3);
+   escenario20.rotation.y = 0.9;  
+escenario20.receiveShadow = true;
+
+
+// ________Interacciones edificio 2________
+    escenario20.addEventListener('mouseover', (event) => {//Evento para cuando colocamos el cursor sobre la figura
+        document.body.style.cursor = 'pointer';
+        event.target.scale.set(4, 4, 4);
+    });
+    escenario20.addEventListener('mouseout', (event) => { //evento para cuando quitas el cursor de la figura, si no se agrega se le quedara el color que se puso en el mouseover
+        document.body.style.cursor = 'default';
+        event.target.scale.set(3, 3, 3);
+    });
+    escenario20.addEventListener('click', (event) => { //evento para cuando se suelta el clic
+        var coords = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+        new TWEEN.Tween(coords)
+            .to({ x: -200, y: 380, z: 800 })//se indican los cambios que se presentaran y en que variables, INDICA LA POSICIÓN FINAL DE MOVIMIENTO
+            .onUpdate(() => camera.position.set(coords.x, coords.y, coords.z)) //Se actualizan las vartiables en el objetivo del movimiento SE ACTUALIZAN LAS VARIABLES EN LA CAMARA
+            .start();
+    });
+    interactionManager.add(escenario20); 
+//-----------Galleta----------
+
+ var escenario9 = galleta({ x: 0, y: 0, z: 0 });
+    scene.add(escenario9); 
+    escenario9.position.set(-930, 100,1450);
+    escenario9.scale.set(5, 5,5);
+   // escenario9.rotation.y = .3;  
+escenario9.receiveShadow = true;
+
+
+ //-----humano 1-----
+
+var escenario11 = h1({ x: 0, y: 0, z: 0 });
+    scene.add(escenario11); 
+    escenario11.position.set(450, 50,1600);
+    escenario11.scale.set(5, 5,5);
+    escenario11.rotation.y = -0.8;  
+escenario11.receiveShadow = true;
+
+
+  //-----humano 1-----
+
+var escenario12 = h2({ x: 0, y: 0, z: 0 });
+    scene.add(escenario12); 
+    escenario12.position.set(-950, 50,400);
+    escenario12.scale.set(6.3, 6.3,6.3);
+    escenario12.rotation.y = 1.8;  
+escenario12.receiveShadow = true;
+ 
+
+///---REGALOS----
+
+ //------REGALO----------
+
+ var escenario13 = regalo({ x: 0, y: 0, z: 0 });
+    scene.add(escenario13); 
+    escenario13.position.set(265, -7, 80);
+    escenario13.scale.set(6, 5.5,6);
+    escenario13.rotation.y = 0.8;  
+escenario13.receiveShadow = true;
+
+//------REGALO----------
+
+ var escenario10 = regalo({ x: 0, y: 0, z: 0 });
+    scene.add(escenario10); 
+    escenario10.position.set(225, -7,200);
+    escenario10.scale.set(4, 4,4);
+    //escenario10.rotation.y = 1.5;  
+escenario10.receiveShadow = true;
+ //escenario10.rotation.y = 1.5;  
+
+
+ //------REGALO 1.1----------
+
+ var escenario16 = regalo2({ x: 0, y: 0, z: 0 });
+    scene.add(escenario16); 
+    escenario16.position.set(-265, -7, 80);
+    escenario16.scale.set(6, 5.5,6);
+    escenario16.rotation.y = 0.8;  
+escenario16.receiveShadow = true;
+
+//------REGALO 2.1----------
+
+ var escenario17 = regalo2({ x: 0, y: 0, z: 0 });
+    scene.add(escenario17); 
+    escenario17.position.set(-225, -7,200);
+    escenario17.scale.set(4, 4,4);
+    //escenario10.rotation.y = 1.5;  
+escenario17.receiveShadow = true;
+
+ 
+//------REGALO----------
+
+ var escenario10 = regalo({ x: 0, y: 0, z: 0 });
+    scene.add(escenario10); 
+    escenario10.position.set(-125, -7,-200);
+    escenario10.scale.set(4, 4,4);
+    //escenario10.rotation.y = 1.5;  
+escenario10.receiveShadow = true;
+//------REGALO 2.1----------
+
+ var escenario17 = regalo2({ x: 0, y: 0, z: 0 });
+    scene.add(escenario17); 
+    escenario17.position.set(125, -7,-200);
+    escenario17.scale.set(4, 4,4);
+    //escenario10.rotation.y = 1.5;  
+escenario17.receiveShadow = true;
+
+
+
+ // DUENDES
+    var escenario1 = duendes({ x: 0, y: 0, z: 0 });
+    scene.add(escenario1); 
+    escenario1.position.set(68, -86, 320);
+    escenario1.scale.set(7, 7, 7);
+    mesh01.receiveShadow = true;
+
+
+
+
+
+ // -----arco------
+ var escenario14 = arco({ x: 0, y: 0, z: 0 });
+    scene.add(escenario14); 
+    escenario14.position.set(30, 4,1390);
+    escenario14.scale.set(9, 8,9); 
+    //escenario14.rotation.y = 1.5;  
+escenario14.receiveShadow = true;
+ //escenario14.rotation.y = 1.5;  
+
+
+//______________FARO 1 izq__________________________
+
+var escenario5 = faro({ x: 0, y: 0, z: 0 });
+    //scene.add(escenario5); 
+    escenario5.position.set(-225, 4, 800); 
+    escenario5.scale.set(2.7, 2.7, 2.7);
+    escenario5.rotation.y = 1.5; 
+
+    //______________FARO 2 izq__________________________
+
+var escenario5 = faro({ x: 0, y: 0, z: 0 });
+    scene.add(escenario5); 
+    escenario5.position.set(-225, 4, 1150);
+    escenario5.scale.set(2.7, 2.7,2.7);
+    escenario5.rotation.y = 1.5; 
+
+
+    //______________FARO 1 der__________________________
+
+var escenario5 = faro({ x: 0, y: 0, z: 0 });
+    //scene.add(escenario5); 
+    escenario5.position.set(225, 4, 900); 
+    escenario5.scale.set(2.7, 2.7, 2.7);
+    escenario5.rotation.y = 1.5; 
+
+    //______________FARO 2 der__________________________
+
+var escenario5 = faro({ x: 0, y: 0, z: 0 });
+    scene.add(escenario5); 
+    escenario5.position.set(225, 4, 1150);
+    escenario5.scale.set(2.7, 2.7,2.7);
+    escenario5.rotation.y = 1.5; 
+
+     //______________FARO 2 izq__________________________
+
+var escenario5 = faro({ x: 0, y: 0, z: 0 });
+    scene.add(escenario5); 
+    escenario5.position.set(-225, 4, 1620);
+    escenario5.scale.set(2.7, 2.7,2.7);
+    escenario5.rotation.y = 1.5; 
+
+    //______________FARO 2 der__________________________
+
+var escenario5 = faro({ x: 0, y: 0, z: 0 });
+    scene.add(escenario5); 
+    escenario5.position.set(225, 4, 1620);
+    escenario5.scale.set(2.7, 2.7,2.7);
+    escenario5.rotation.y = 1.5; 
+
+//______________ARBOL CAMINO 2 izq__________________________
+
+var escenario5 = arbol2({ x: 0, y: 0, z: 0 });
+    scene.add(escenario5); 
+    escenario5.position.set(-1000, -9, 800);
+    escenario5.scale.set(2.5, 2.5,2.5);
+    escenario5.rotation.y = 1.5; 
+
+
+//______________ Empieza Camino Derecho_________________
+
+//______________ARBOL CAMINO 1 der__________________________
+
+var escenario5 = arbol2({ x: 0, y: 0, z: 0 });
+    scene.add(escenario5); 
+    escenario5.position.set(1055, 4, 900);
+    escenario5.scale.set(2, 2, 2);
+    escenario5.rotation.y = 1.5; 
+//______________ARBOL CAMINO 2 der__________________________
+
+var escenario5 = arbol2({ x: 0, y: 0, z: 0 });
+    scene.add(escenario5); 
+    escenario5.position.set(1055, 4, 1300);
+    escenario5.scale.set(2, 2, 2); 
+    escenario5.rotation.y = 1.5; 
+
+    //------REGALO----------
+
+ var escenario10 = regalo({ x: 0, y: 0, z: 0 });
+    scene.add(escenario10); 
+    escenario10.position.set(905, -7,1300);
+    escenario10.scale.set(4, 4,4);
+    //escenario10.rotation.y = 1.5;  
+escenario10.receiveShadow = true;
+
+//------REGALO 2.1----------
+
+ var escenario22 = regalo2({ x: 0, y: 0, z: 0 });
+    scene.add(escenario22); 
+    escenario22.position.set(905, -7,900);
+    escenario22.scale.set(4, 4,4);
+    //escenario10.rotation.y = 1.5;  
+escenario22.receiveShadow = true;
+
+// BOTA
+    var escenario4 = bota({ x: 0, y: 0, z: 0 });
+    scene.add(escenario4); 
+    escenario4.position.set(905, -75, 1100);
+    escenario4.scale.set(10, 10, 10);
+    escenario4.rotation.y = -1;   
+
+//-----humano 1-----
+
+var escenario11 = h2({ x: 0, y: 0, z: 0 });
+    scene.add(escenario11); 
+    escenario11.position.set(905, 50,1500);
+    escenario11.scale.set(5, 5,5);
+    escenario11.rotation.y = -2;  
+escenario11.receiveShadow = true;
+ 
+
+  //-----humano 1-----
+
+var escenario12 = h1({ x: 0, y: 0, z: 0 });
+    scene.add(escenario12); 
+    escenario12.position.set(950, 50,660);
+    escenario12.scale.set(6.3, 6.3,6.3);
+    escenario12.rotation.y = -1;  
+escenario12.receiveShadow = true; 
+      
+//texto
+
+
+  var loader = new FontLoader();
+  var font = loader .parse(fontJSON3);
+  var geometry1 = new TextGeometry('BIENVENIDOS :)',{
+    font:font,
+    size: 45,  
+    height:15,  
+  });
+  geometry1.center();
+
+  var material01 = new THREE.MeshLambertMaterial({
+
+    color: 0xFFFF,
+    emissive:0xFF9552,
+    shading: THREE.FlatShading,
+
+  });
+
+  var meshTexto= new THREE.Mesh(geometry1,material01);
+  scene.add(meshTexto);
+meshTexto.position.set(0,320,1480)
+meshTexto.castShadow=true;
+
+
+
+//______________ARBOL CAMINO 4 der__________________________
+
+var escenario5 = arbol2({ x: 0, y: 0, z: 0 });
+   // scene.add(escenario5); 
+    escenario5.position.set(225, 4, 550);
+    escenario5.scale.set(1, 1, 1);
+    escenario5.rotation.y = 1.5; 
+
+//____________Arbol Centro_____________
+
+ // ARBOL
+    var escenario3 = arbol({ x: 0, y: 0, z: 0 });
+    scene.add(escenario3); 
+    escenario3.position.set(-5, -7, 80);
+    escenario3.scale.set(3, 3, 3);
+// ________Interacciones________
+    escenario3.addEventListener('mouseover', (event) => {//Evento para cuando colocamos el cursor sobre la figura
+        document.body.style.cursor = 'pointer';
+        event.target.scale.set(3.3, 3.3, 3.3);
+    });
+    escenario3.addEventListener('mouseout', (event) => { //evento para cuando quitas el cursor de la figura, si no se agrega se le quedara el color que se puso en el mouseover
+        document.body.style.cursor = 'default';
+        event.target.scale.set(2.7, 2.7, 2.7);
+    });
+    escenario3.addEventListener('click', (event) => { //evento para cuando se suelta el clic
+        var coords = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+        new TWEEN.Tween(coords)
+            .to({ x: 170, y: 230, z: 1050})//se indican los cambios que se presentaran y en que variables, INDICA LA POSICIÓN FINAL DE MOVIMIENTO
+            .onUpdate(() => camera.position.set(coords.x, coords.y, coords.z)) //Se actualizan las vartiables en el objetivo del movimiento SE ACTUALIZAN LAS VARIABLES EN LA CAMARA
+            .start();
+    });
+    interactionManager.add(escenario3); 
+
+
+
+
+     // ________Interacciones________
+    mesh01.addEventListener('mouseover', (event) => {//Evento para cuando colocamos el cursor sobre la figura
+        document.body.style.cursor = 'pointer';
+        //event.target.scale.set(13, 13, 13);
+    });
+    mesh01.addEventListener('mouseout', (event) => { //evento para cuando quitas el cursor de la figura, si no se agrega se le quedara el color que se puso en el mouseover
+        document.body.style.cursor = 'default';
+        //event.target.scale.set(12, 12, 12);
+    });
+    mesh01.addEventListener('click', (event) => { //evento para cuando se suelta el clic
+        var coords = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+        new TWEEN.Tween(coords)
+            .to({ x: 0, y: 100, z: 2050 })//se indican los cambios que se presentaran y en que variables, INDICA LA POSICIÓN FINAL DE MOVIMIENTO
+            .onUpdate(() => camera.position.set(coords.x, coords.y, coords.z)) //Se actualizan las vartiables en el objetivo del movimiento SE ACTUALIZAN LAS VARIABLES EN LA CAMARA
+            .start();
+    });
+    interactionManager.add(mesh01); 
+
+
+    //🎰 Render y animación
+    function render() {
+        TWEEN.update();
+        interactionManager.update();
+         //🪄🪄 Animación - 
+
+      //Llamado para renderizar y volver a llamar a la misma función (render)
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+    }
+    render();
+</script>
+</body>
+</html>
